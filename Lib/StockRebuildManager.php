@@ -52,7 +52,7 @@ class StockRebuildManager
         static::clear();
 
         foreach (Almacenes::all() as $war) {
-            foreach (static::calculateStockData($war->codalmacen) as $data) {
+            foreach (static::calculateStockData($war->codalmacen) as $data) {       // JOSEA: todo el producto y si tiene tallas y colores?
                 $stock = new Stock();
                 $where = [
                     Where::column('codalmacen', $data['codalmacen']),
@@ -146,7 +146,7 @@ class StockRebuildManager
             }
 
             // si hay último movimiento, y la suma de movimientos es distinta al saldo del último movimiento, avisamos
-            if ($lastMovement->id() && $lastMovement->saldo !== $stockSumMovements) {
+            if ($lastMovement->id() && $lastMovement->saldo > 0 && $lastMovement->saldo !== $stockSumMovements) {
                 $stock = $lastMovement->saldo;
                 Tools::log()->warning('stock-rebuild-inconsistency-detected', ['%referencia%' => $row['referencia'], '%codalmacen%' => $codalmacen, '%last_saldo%' => $lastMovement->saldo, '%sum_movements%' => $stockSumMovements]);
                 Tools::log('audit')->warning('stock-rebuild-inconsistency-detected', ['%referencia%' => $row['referencia'], '%codalmacen%' => $codalmacen, '%last_saldo%' => $lastMovement->saldo, '%sum_movements%' => $stockSumMovements]);

@@ -346,13 +346,13 @@ class StockMovementManager
 
     protected static function rebuildBusinessDocument(): void
     {
-        $limit = 1000;
+        $limit = 100;
         $models = [new AlbaranProveedor(), new FacturaProveedor(), new AlbaranCliente(), new FacturaCliente()];
         foreach ($models as $model) {
             $offset = 0;
             $docs = $model->all([], ['fecha' => 'DESC'], $offset, $limit);
 
-            while (count($docs) > 0) {
+            while (false === empty($docs)) {
                 foreach ($docs as $doc) {
                     // Saltar estados que no modifican el stock
                     if (static::ignoredBusinessDocumentState($doc)) {
@@ -365,14 +365,14 @@ class StockMovementManager
                             continue;
                         }
 
-                        // Omitir productos faltantes o productos sin gestión de stock
-                        $product = static::getProduct($line->referencia);
-                        if (empty($product->idproducto) || $product->nostock) {
+                        // omitimos el producto si no es el que buscamos
+                        if (null !== static::$idproducto && $line->idproducto !== static::$idproducto) {
                             continue;
                         }
 
-                        // omitimos el producto si no es el que buscamos
-                        if (null !== static::$idproducto && $product->idproducto !== static::$idproducto) {
+                        // Omitir productos faltantes o productos sin gestión de stock
+                        $product = static::getProduct($line->referencia);
+                        if (empty($product->idproducto) || $product->nostock) {
                             continue;
                         }
 
