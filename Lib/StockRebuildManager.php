@@ -116,6 +116,10 @@ class StockRebuildManager
 
     protected static function calculateStockData(string $codalmacen): array
     {
+        $stockData = [];
+        static::setPterecibir($stockData, $codalmacen);
+        static::setReservada($stockData, $codalmacen);
+
         // obtenemos un array de referencias únicas
         $sql = "SELECT referencia"
             . " FROM stocks_movimientos"
@@ -128,10 +132,9 @@ class StockRebuildManager
 
         // si no hay referencias, devolvemos array vacío
         if (empty($rows)) {
-            return [];
+            return $stockData;
         }
 
-        $stockData = [];
         foreach ($rows as $row) {
             $where = [
                 Where::eq('codalmacen', $codalmacen),
@@ -151,9 +154,6 @@ class StockRebuildManager
                 'reservada' => 0
             ];
         }
-
-        static::setPterecibir($stockData, $codalmacen);
-        static::setReservada($stockData, $codalmacen);
 
         return $stockData;
     }
@@ -225,7 +225,6 @@ class StockRebuildManager
             . " SUM(CASE WHEN l.cantidad > l.servido THEN l.cantidad - l.servido ELSE 0 END) as pte"
             . " FROM {$linesTable} l"
             . " JOIN {$table} p ON p.{$field} = l.{$field}"
-            . " JOIN variantes v ON v.referencia = l.referencia"
             . " WHERE l.referencia IS NOT NULL";
 
         if (null !== static::$idproducto) {
@@ -273,7 +272,6 @@ class StockRebuildManager
             . " SUM(CASE WHEN l.cantidad > l.servido THEN l.cantidad - l.servido ELSE 0 END) as reservada"
             . " FROM {$linesTable} l"
             . " JOIN {$table} p ON p.{$field} = l.{$field}"
-            . " JOIN variantes v ON v.referencia = l.referencia"
             . " WHERE l.referencia IS NOT NULL";
 
         if (null !== static::$idproducto) {
