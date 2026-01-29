@@ -146,13 +146,15 @@ class StockRebuildManager
             $lastMovement->loadWhere($where, ['fecha' => 'DESC', 'hora' => 'DESC', 'id' => 'DESC']);
 
             $ref = trim($row['referencia']);
-            $stockData[$ref] = [
-                'cantidad' => $lastMovement->saldo,
-                'codalmacen' => $codalmacen,
-                'pterecibir' => 0,
-                'referencia' => $ref,
-                'reservada' => 0
-            ];
+            if (!isset($stockData[$ref])) {
+                $stockData[$ref] = [
+                    'codalmacen' => $codalmacen,
+                    'pterecibir' => 0,
+                    'referencia' => $ref,
+                    'reservada' => 0
+                ];
+            }
+            $stockData[$ref]['cantidad'] = $lastMovement->saldo;
         }
 
         return $stockData;
